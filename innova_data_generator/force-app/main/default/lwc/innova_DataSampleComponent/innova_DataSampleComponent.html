@@ -1,0 +1,220 @@
+<template>
+    <lightning-card>
+           <!-- Spinner  -->
+   <div class="slds-modal__content modalBodySpinner" if:true={showLoading}>
+    <div>
+        <section aria-modal="true" class="slds-modal slds-fade-in-open">
+        <!-- <lightning-spinner alternative-text="Loading" size="medium" class="spinnerClass"></lightning-spinner> -->
+        <div class="slds-m-around_large">
+            <!-- <div  class="slds-is-relative"> -->
+             <div> 
+                <lightning-spinner
+                    alternative-text="Loading..." variant="brand">
+                </lightning-spinner>
+            </div>
+        </div>
+    </section>
+</div>
+    </div>
+    <div class="slds-card" style="font-family: 'Open Sans',sand-serif;">
+
+    <div class="slds-box slds-align_absolute-center" if:false={isFieldDisabled}>
+        <h3 style="font-weight:bold; font-size: medium;">Choose Data Sample</h3>
+      </div>
+
+      <!------------------------ Mandatory Field Started ------------------------>
+    <table class="slds-table slds-table_bordered  slds-no-row-hover slds-table_cell-buffer" role="grid">
+        <thead>
+            <tr>
+                <th scope="col" height="22" style="width: 3rem">.</th>
+                <th scope="col" height="22" title="Required" > 
+                    <span>
+                        Required Field <lightning-helptext content="These are the required field which need to be populated"></lightning-helptext>
+                </span>
+             
+                </th>
+                <th scope="col" height="22">Value</th>
+                <!-- <th scope="col" height="22" style="width: 3rem"></th> -->
+            </tr>
+            </thead>
+            <tbody>
+                <!-- <template for:each={listOfRequiredFields} for:item="rec" if:true={listOfRequiredFields}> -->
+
+                        <template for:each={allFieldsFromObject} for:item="fieldData" if:true={allFieldsFromObject}>
+                            <tr class="slds-hint-parent" key={fieldData} if:false={fieldData.fldIsNillable}>
+                                <td style="font-weight:bold">
+                                    <lightning-formatted-number value={fieldData.index}></lightning-formatted-number><span></span>
+                                    </td>
+                            <td style="font-weight:bold" >
+                                <lightning-input type="text" 
+                                                 value={fieldData.custFldlabel}  
+                                                 disabled=true
+                                                 variant="label-hidden" 
+                                                 name="Field" 
+                                                 required
+                                                  >
+        
+                                </lightning-input>
+                            </td>
+                            <td style="font-weight:bold">
+                                <!-- <lightning-input type="text"  class="requiredFieldCls" variant="label-hidden" label="" data-id={fieldData.index} name="Value"  onchange={selectedField}></lightning-input> -->
+                            <div  if:false={fieldData.isDateType}>
+                                <div if:false={fieldData.isPicklist} >
+                                <lightning-input 
+                                type="text"  class="requiredFieldClsv" 
+                                required
+                                variant="label-hidden" 
+                                label="" 
+                                placeholder={fieldData.dataType} 
+                                data-id={fieldData.index} 
+                                name={fieldData.custFldvalue} 
+                                disabled={isFieldDisabled}>
+                            </lightning-input>
+                            </div>
+                            </div>
+                            <div if:true={fieldData.isPicklist} >
+                                <select class="slds-select requiredField requiredFieldClsv" name={fieldData.custFldvalue} required  disabled={isFieldDisabled}>
+                                    <template for:each={fieldData.pickJSONArrRes} for:item="pickName">
+                                        <option key={pickName.pickKeys}  value={pickName.pickKeys} >
+                                          {pickName.pickKeys}
+                                        </option>
+                                      </template>
+                                    </select>
+                            <!-- <lightning-input 
+                                type="text"  class="requiredFieldClsv" 
+                                variant="label-hidden" 
+                                label="" 
+                                placeholder='Add Picklist'
+                                data-id={fieldData.index} 
+                                name={fieldData.custFldvalue} >
+                            </lightning-input> -->
+                        </div>
+                        <div if:true={fieldData.isDateType}>
+                            <lightning-input 
+                            type="date"  class="requiredFieldClsv" 
+                            variant="label-hidden" 
+                            label="" 
+                            required
+                            placeholder='Select Date'
+                            data-id={fieldData.index} 
+                            name={fieldData.custFldvalue} 
+                            disabled={isFieldDisabled} >
+                        </lightning-input>
+                            </div>
+                            </td>
+                        </tr>
+                        </template>
+
+               
+            <!-- </template> -->
+
+            </tbody>
+            
+            </table>
+            <br>
+            <div>
+       
+       
+    </div>
+    <!------------------------ Mandatory Field End ------------------------>
+    <br>
+    <div class="slds-align_absolute-center" style="padding: 9px;">
+        <lightning-button icon-name="" alternative-text="Optional Fields" label="Add Optional Fields" title="Optional Fields"  onclick={handleOptionalFieldsDisplay}></lightning-button>
+    </div>
+    </div>
+
+    <!--  ---------------------------------------------------Optional field Start-- ----------------------------------------- -->
+  <template if:true={isOptionalDisplay}>
+
+<!--     
+    <template for:each={listOfOptionalFields} for:item="rec">
+        <c-innova_-render-fields-component key={rec}
+        rec-key={rec}
+        list-of-optional-fields={listOfOptionalFields}
+        >
+        </c-innova_-render-fields-component>
+    </template> -->
+
+    <table class="slds-table slds-table_bordered  slds-no-row-hover slds-table_cell-buffer" role="grid">
+        <thead>
+            <tr>
+                <th scope="col" height="22" style="width: 3rem"></th>
+                <th scope="col" height="22">Optional Field
+                    <span>
+                        <lightning-helptext content="These are the optional field which need to be populated"></lightning-helptext>
+                    </span>
+                </th>
+                <th scope="col" height="22">Value</th>
+                <th scope="col" height="22" style="width: 3rem"></th>
+            </tr>
+            </thead>
+            <tbody>
+                <template for:each={listOfOptionalFields} for:item="rec">
+                    <tr key={rec} class="slds-hint-parent">
+                    <td style="font-weight:bold">
+                    <lightning-formatted-number value={rec.index}></lightning-formatted-number><span>.</span>
+                    </td>
+    
+                    <td>
+                        <!-- changing picklist to input type  -->
+                        <div>
+                        <c-innova_-render-fields-component
+                                  rec-key={rec}
+                                  rec ={rec}
+                                  all-fields-from-object={allFieldsFromObject}  
+                                  list-of-optional-fields={listOfOptionalFields}  
+                                  onselectedoptionalfld={handleSelectedOptionalFld}  
+                                  is-otional-display={isOptionalDisplay}     
+                                  is-field-disabled={isFieldDisabled}                      >
+                        </c-innova_-render-fields-component>
+                    </div>
+                            <!-- <select class="slds-select ddlViewBy" name="Field" data-id={rec.index} onchange={selectedFieldOptional}>
+                            <option value="null">---None---</option>                
+                              <template for:each={allFieldsFromObject} for:item="fieldData">
+                                <option key={fieldData.dataType} value={fieldData.custFldvalue} if:true={fieldData.fldIsNillable}>
+                                  {fieldData.custFldlabel}  | <p style="font-style:italic">{fieldData.dataType}</p>
+                                </option>
+                              </template>
+                      </select> -->
+                      <!-- <lightning-input type="text" variant="label-hidden" label="" data-id={rec.index} name="Value" value={rec.Value} onchange={selectedFieldOptional}></lightning-input> -->
+                    </td>
+                    
+
+    
+                    <td>
+                        <lightning-button-icon class=" slds-button_destructive"  icon-name="utility:delete" alternative-text="Remove" title="Remove" name={rec.index} onclick={removeRowOptional}></lightning-button-icon>
+                        &nbsp;
+                        <lightning-button-icon variant="brand" label="add additional row" title="add additional row" icon-name="utility:add" onclick={addNewRowOptional}></lightning-button-icon>
+                    </td>
+                    </tr>
+                </template>
+            </tbody>
+    
+    </table>
+</template>  
+<!--  ------------------------------Optional field END---------------------- -->
+</lightning-card>
+
+
+<!-- Footer -->
+
+<footer class="slds-modal__footer " style="padding: 2.50rem 1rem;" if:false={isFieldDisabled}>
+    <!-- <lightning-button class="slds-p-left_right" variant="destructive" label="delete all rows" title="delete all rows" icon-name="utility:recycle_bin_full" onclick={removeAllRows}></lightning-button> -->
+    
+    <div class="slds-clearfix slds-align_absolute-center">
+            <!-- class ="slds-align_absolute-center" -->
+
+        <!-- <div class="slds-float_left">
+            <lightning-button  icon-name="utility:download" variant="brand" label="Create Record(s)" title="Submit Your Request to Generate Records" onclick={inserSeltRecords}></lightning-button>
+        </div>  -->
+      </div>
+      <div class="slds-clearfix slds-align_absolute-center" style="text-align:center;font-weight:600;"><lightning-formatted-text value={cautionvar} ></lightning-formatted-text></div>
+
+</footer>
+
+
+
+
+
+    
+</template>

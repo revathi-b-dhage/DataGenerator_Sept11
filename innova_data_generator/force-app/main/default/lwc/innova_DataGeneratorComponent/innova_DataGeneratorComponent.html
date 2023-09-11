@@ -1,0 +1,697 @@
+<template>
+  <lightning-card icon-name="action:contract_line_outcome_data">
+    <div>
+      <div class="slds-align_absolute-center" style="height:5rem">
+        <p style="font-size:24px; font-weight:bold ;">Data Generator</p>
+      </div>
+    </div>
+    <table class="slds-table slds-table_bordered  slds-no-row-hover slds-table_cell-buffer" role="grid">
+      <thead>
+        <tr>
+          <th scope="col" height="22" title="Required">Select Object</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <select class="slds-select requiredField" name="Field" onchange={handleChangeObjectName} required>
+              <option value="None">---None---</option>
+              <template for:each={objOptions} for:item="objName">
+                <option key={objName.value} value={objName.value}>
+                  {objName.label}
+                </option>
+              </template>
+            </select>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </lightning-card>
+
+  <!-- ---------------------- New Tab Changes START------------------------ -->
+  <lightning-card icon-name="action:contract_line_outcome_data" class="slds-box slds-size_11-of-12">
+
+    <div class="slds-form-element " style="margin-left:2rem; padding:5px">
+      <div class="slds-form-element__control">
+        <div class="slds-checkbox">
+          <input type="checkbox" name="options" id="checkbox-unique-id-80" value="checkbox-unique-id-80"
+            onclick={createRecForUser} />
+          <!--    checked={isCreateRelated}  -->
+          <label class="slds-checkbox__label" for="checkbox-unique-id-80">
+            <span class="slds-checkbox_faux"></span>
+            <span class="slds-form-element__label">Create records for specific user?</span>
+          </label>
+        </div>
+      </div>
+      <template if:true={isCreateForSpecificUser}>
+        <lightning-combobox name="progress" label="User" value={value} placeholder="Select User" options={userList}
+          onchange={handleUserChange}></lightning-combobox>
+
+        <!-- <p>Selected value is: {value}</p> -->
+      </template>
+    </div>
+
+    <lightning-tabset>
+      <lightning-tab label="Single record creation" value="Single" onactive={tabChanged}>
+        <div class="slds-box slds-size_11-of-12" style="margin-left:1rem">
+          <div>
+            <c-innova_-data-sample-component all-fields-from-object={allFieldsFromObject}
+              related-sobj-name={selectedRelatedObjName} object-name={objectName} number-field-value={numberFieldValue}
+              is-create-related={isCreateRelated} is-field-disabled={isFieldDisabled}
+              onsinglerecordinsertsuccess={handleSingleRecInsEvent} ></c-innova_-data-sample-component>
+          </div>
+        </div>
+      </lightning-tab>
+      <lightning-tab label="Multiple Record creation ( CSV only )" value="Multiple" onactive={tabChanged}>
+        <div class="slds-box slds-size_11-of-12 " style="margin-left:1rem">
+          <lightning-file-upload label="Attach File" disabled={isObjectBlank} name="fileUploader"
+            accept={acceptedFormats} record-id={myRecordId} onuploadfinished={handleUploadFinished}>
+          </lightning-file-upload>
+          <div if:true={isObjectBlank} style="color: red;">
+            <p>Please select an object </p>
+
+          </div>
+          <!-- <lightning-button  class="slds-m-left_xx-small" variant="brand" label="Fast Create" title="Submit Your Request to Generate Records" onclick={wrapfastCreateRecords}></lightning-button> -->
+
+        </div>
+        <div class="slds-clearfix slds-align_absolute-center" style="text-align:center;font-weight:600;">
+          <lightning-formatted-text value={cautionvar}></lightning-formatted-text>
+        </div>
+      </lightning-tab>
+
+      <!-- <lightning-tab label="Multiple record creation" title="2nd tab extended title"> -->
+
+      <!-- IF true display modal  to create multiple records -->
+      <!-- Modal/Popup Box LWC starts here -->
+      <!-- Modal/Popup Box LWC header here -->
+      <!-- <div class=" slds-box slds-size_11-of-12" style="margin-left:1rem">  -->
+      <!-- <lightning-card variant="Narrow" icon-name="standard:dashboard_component "> -->
+      <!-- <div class="slds-grid slds-wrap " > -->
+
+
+      <!--                        
+                            <div class="slds-size_1-of-3">
+                              <div class="slds-box slds-box_x-small slds-text-align_center slds-m-around_x-small">
+                                <lightning-input type="number"  class="noOfRecordFastCreate" required="true" name="" placeholder="Enter No of Record" style="display : inline-block;" onchange={noOfRecordtoCreate}></lightning-input>
+                              </div>
+                            </div>
+                            
+                            
+                      </div>    -->
+      <!-- <div class="slds-card"> -->
+      <!-- Pagination Started  -->
+      <!-- <template for:each={visibleRepeatChild} for:item="rep" for:index="i">
+                             <lightning-card key={rep} >
+                               <c-innova_-data-sample-component all-fields-from-object={allFieldsFromObject}  related-rec-popup={relatedRecPopup} object-name={objectName}  onrecordinsertedsuccessfully={handleSmapleDataCustomEvent}></c-innova_-data-sample-component>
+                             </lightning-card>
+                             </template>
+                             <div class="slds-var-m-vertical_medium">
+                               <c-innova_-pagination-component records={repeatChild} is-next-enabled={isNextEnabled} record-size={parentRecordSize} onupdate={updatePaginationHandler}></c-innova_-pagination-component>
+                             </div> -->
+      <!-- </div>      -->
+      <!-- </lightning-card> -->
+
+      <!-- </div> -->
+
+      <!-- <div class="slds-backdrop slds-backdrop_open"></div> -->
+
+
+      <!-- </lightning-tab> -->
+      <lightning-tab label="Related record creation" value="Related" onactive={tabChanged}>
+        <!-- <div class="slds-box slds-p-around_medium slds-theme_default " style="margin-left:1rem"></div> -->
+        <div class="slds-box slds-size_11-of-12 " style="margin-left:1rem">
+          <div class="slds-grid slds-wrap " style="margin-left: 1rem;">
+            <template if:true={relatedSObjRecords} for:each={relatedSObjRecords} for:item="currentObj">
+              <div class=" slds-box  slds-col slds-size_3-of-12 slds-m-top_xx-small" style="margin-left: 1rem;"
+                key={currentObj.objId}>
+                <c-innova_-related-object-list-component data-id={currentObj.objId} rel-obj={currentObj}
+                  onselect={handleSelect} onmouseover={handleMouseover} onmouseout={handleMouseout}>
+                </c-innova_-related-object-list-component>
+              </div>
+            </template>
+          </div>
+          <!-- <div class="slds-card slds-p-around_medium slds-align_absolute-center">
+<lightning-button  icon-name="utility:download" variant="brand" label="Create Seq Record(s)" title="Submit Your Request to Create Sequential Records" onclick={insertSeqRecords}></lightning-button>
+</div >     -->
+          <div class="slds-clearfix slds-align_absolute-center" style="text-align:center;font-weight:600;">
+            <lightning-formatted-text value={cautionvar}></lightning-formatted-text>
+          </div>
+        </div>
+      </lightning-tab>
+      <lightning-tab label="Fast record creation" value="Fast" onactive={tabChanged}>
+        <div class="slds-box slds-size_11-of-12 slds-clearfix slds-align_absolute-center" style="margin-left:1rem">
+          <div>
+            <lightning-input type="number" class="noOfRecordFastCreateTab" required="true" name=""
+              placeholder="Enter No of Record" style="display : inline-block;" onchange={noOfRecordtoCreate}>
+            </lightning-input>
+            &nbsp;&nbsp;
+            <!-- <lightning-button  class="slds-m-left_xx-small" variant="brand" label="Fast Create" title="Submit Your Request to Generate Records" onclick={fastCreateRecords}></lightning-button> -->
+            <!-- <button class="slds-button  slds-button_brand"  onclick={fastCreateRecords}>Fast Create</button> -->
+          </div>
+        </div>
+        <div class="slds-clearfix slds-align_absolute-center" style="text-align:center;font-weight:600;">
+          <lightning-formatted-text value={cautionvar}></lightning-formatted-text>
+        </div>
+
+      </lightning-tab>
+
+      <lightning-tab label="Push/Pull record " value="Push/Pull" onactive={tabChanged}>
+        <!-- <div class="slds-box slds-size_11-of-12 slds-clearfix slds-align_absolute-center" style="margin-left:1rem" > 
+        <div>
+        <lightning-input type="number"  class="noOfRecordFastCreateTab" required="true" name="" placeholder="Enter No of Record" style="display : inline-block;" onchange={noOfRecordtoCreate}></lightning-input>
+        &nbsp;&nbsp;
+      </div>
+      </div>
+      <div class="slds-clearfix slds-align_absolute-center" style="text-align:center;font-weight:600;"><lightning-formatted-text value={cautionvar}></lightning-formatted-text></div>
+     -->
+
+        <div class="slds-grid slds-gutters slds-align_absolute-center">
+
+          <div class="slds-col slds-box slds-size_5-of-12">
+            <div class="slds-form-element">
+              <!-- <label class="slds-form-element__label" for="text-input-id-52">
+                <abbr class="slds-required" title="required">* </abbr></label> -->
+              <!-- Username -->
+              <!-- <div class="slds-form-element__control">
+                <input type="text" id="text-input-id-52" placeholder="Enter Username" name="username" required=""
+                  class="slds-input sync" />
+              </div> -->
+
+              <!-- <label class="slds-form-element__label" for="text-input-id-53">
+                <abbr class="slds-required" title="required">* </abbr></label>
+              <div class="slds-form-element__control">
+                <input type="text" id="text-input-id-53" placeholder="Enter Password" name="password" required=""
+                  class="slds-input sync" />
+              </div> -->
+
+              <!--<label class="slds-form-element__label" for="text-input-id-54">
+                <abbr class="slds-required" title="required">* Enter Endpoint URL</abbr></label>-->
+              <div class="slds-form-element__control">
+                <!--<input type="text" id="text-input-id-54" placeholder="Enter Endpoint URL" name="enpointURL" required=""
+                  class="slds-input sync" />-->
+              <lightning-input name="enpointURL" class="sync" id="text-input-id-54" onchange={handleSynChange} required  placeholder="Enter Endpoint URL..." label="Enter Endpoint URL" message-when-value-missing="Value is Required." ></lightning-input>
+              </div>
+ 
+            </div>
+            <div class="slds-m-vertical_medium">
+              <lightning-button class="slds-m-right_small" disabled={disableSync} onclick={syncWithOrg} label={btnLabel} icon-name={toggleIconName}></lightning-button>
+            </div>
+            <!--<input type="button" class="slds-button slds-m-vertical_medium slds-button_neutral slds-m-right-small" onclick={syncWithOrg}
+              value={btnLabel}></input>-->
+     
+
+              <!-- Section for PUSH/PULL after authorization START-->
+              <template if:true={namedCredential}>
+
+                <div class="">
+                <lightning-tabset variant="scoped">
+                
+                <lightning-tab label="Pull records" onactive={tabChanged}>
+                  <!--<label class="slds-form-element__label" for="textarea-id-01">Enter SOQL</label>-->
+                  <div class="slds-form-element__control">
+                    <lightning-textarea name="soqltext" class="sync" id="textarea-id-01" onchange={handleSoqlChange} required value="" placeholder="Enter SOQL Query" label="Enter SOQL" message-when-value-missing="Value is Required." ></lightning-textarea>
+                    <!--<textarea id="textarea-id-01"  placeholder="" name="soqltext"
+                      class="slds-textarea sync"></textarea>-->
+                  </div>
+                  <div class="slds-m-top_medium">
+                    
+                    <lightning-button label="Pull" disabled={disablePull} class ="slds-m-right_small" title="Pull Records"
+                        onclick={handlePullcall} ></lightning-button>
+                    
+                    <lightning-button icon-name="utility:download"  disabled={disablepullcsv} label="Download CSV" title="Download CSV File"
+                        onclick={downloadCSV} variant="brand"></lightning-button>
+                
+                  </div>
+                
+                </lightning-tab>
+                
+                <lightning-tab label="Push  records" value="PushRecords"  onactive={tabChanged}>
+                
+                  <div >
+                    <template if:true={otherOrgObjects}>
+                    <c-innova_-search-object-name required="true" label="Object Name" selected-icon-name="standard:sobject" sobject-list={otherOrgObjects} object-label="API Name"
+                    placeholder="Enter to Search..."  onvalueselected={handleValueSelected}> 
+                    
+                    </c-innova_-search-object-name>
+                    </template>
+                    <div class="slds-form-element slds-text-align_center slds-has-error">
+                      <span class="slds-form-element__label" id="file-selector-primary-label-101"></span>
+                      <div class="slds-form-element__control">
+                        <div class="slds-file-selector slds-file-selector_files">
+                          <div class="slds-file-selector__dropzone">
+                            <input type="file" class="slds-file-selector__input slds-assistive-text" accept=".csv"
+                              id="file-upload-input-103" aria-describedby="error-104"
+                              aria-labelledby="file-selector-primary-label-101 file-selector-secondary-label102"
+                              onchange={openfileUpload} />
+                            <label class="slds-file-selector__body" for="file-upload-input-103"
+                              id="file-selector-secondary-label102">
+                              <span class="slds-file-selector__button slds-button slds-button_neutral">
+                                <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                                  <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#upload"></use>
+                                </svg>Upload Files</span>
+                              <span class="slds-file-selector__text slds-medium-show">or Drop Files</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      <div if:true={fileNotSupported} class="slds-form-element__help" id="error-104">File type not supported
+                      </div>
+        
+                    </div>
+                    <template if:true={fileData}>
+                      <p>{fileData.filename}</p>
+                    </template>
+                    <div class=" slds-m-top_x-small">
+                    <lightning-button variant="brand" class="slds-m-right_medium" disabled={disableSubmit} label="Submit" title="Submit" onclick={handleFileUpload}
+                      ></lightning-button>
+                    <lightning-button variant="brand" class="slds-m-right_medium" disabled={disableInsercsv} icon-name="utility:download" label="Download CSV File" title="Download CSV File" onclick={downloadInsertCSV}
+                    ></lightning-button>
+                      <template if:true={insertError}>
+                          <lightning-accordion class ='accordinM' allow-multiple-sections-open onsectiontoggle={handleSectionToggle}>
+                            <lightning-accordion-section  name="Error" label="Error">
+                              <div data-id="overview" class="accErroDiv slds-box slds-theme_shade slds-p-horizontal--large">
+                              </div>
+                            </lightning-accordion-section>
+                          </lightning-accordion>
+                      </template>
+                    </div>
+                  </div>
+                
+                </lightning-tab>
+                
+              
+                
+                </lightning-tabset>
+              </div>
+                
+                </template>
+
+            <!-- Section for PUSH/PULL after authorization END-->
+
+        
+            
+              <!-- <div>
+                <div class="slds-form-element">
+                  <div class="slds-form-element__control">
+                    <div class="slds-checkbox">
+                      <input type="checkbox" name="options" id="checkbox-unique-id-90" value="checkbox-unique-id-80"
+                        onclick={handlePushRecordChange} />
+                      <label class="slds-checkbox__label" for="checkbox-unique-id-90">
+                        <span class="slds-checkbox_faux"></span>
+                        <span class="slds-form-element__label">Push Record</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+     -->
+    
+            
+
+
+          </div>
+          <div class="slds-col slds-box slds-size_5-of-12 slds-m-left_xxx-small ">
+
+            <div class="slds-p-horizontal_small slds-scrollable" style="height:13.6rem;">
+              <ul>
+                <p>Before an user starts connecting with another Salesforce Org, </p>
+                <p> there are some configurational pre-requisites which needs to be followed in order to setup the
+                  integration: </p>
+                <li>
+                  <p><span>1)</span> <strong> Create a connected App at the destination Org. </strong></p>
+                  <ul class="slds-is-nested">
+                    <li>Connected App Name : Data Generator</li>
+                    <li>API Name : Data_Generator</li>
+                    <li>Contact Email : enter_your_email </li>
+                    <li>Enable OAuth Settings : checked</li>
+                    <li>Refresh Token Policy: refresh token is valid until revoked</li>
+                  </ul>
+                </li>
+                <li>
+                  <p><span>2)</span> <strong> Create an auth provider in source org. </strong></p>
+                  <ul class="slds-is-nested">
+                    <li> Provider Type : Salesforce</li>
+                    <li> Name : enter a auth. provider name</li>
+                    <li> URL Suffix : same as auth provider name</li>
+                    <li> Authorize Endpoint URL : https://login.salesforce.com/services/oauth2/authorize</li>
+                    <li>Token Endpoint URL : https://login.salesforce.com/services/oauth2/token</li>
+                    <li> Default Scopes : full refresh_token Under Salesforce Configuration section:</li>
+                    <ul class="slds-is-nested">
+                      <li>Test-Only Initialization URL :
+                        https://deloitte-5a2-dev-ed.my.salesforce.com/services/auth/test/Innova_ToolingAPIAuth</li>
+                      <li>Existing User Linking URL :
+                        https://deloitte-5a2-dev-ed.my.salesforce.com/services/auth/link/Innova_ToolingAPIAuth</li>
+                      <li>OAuth-Only Initialization URL :
+                        https://deloitte-5a2-dev-ed.my.salesforce.com/services/auth/oauth/Innova_ToolingAPIAuth</li>
+                      <li>Callback URL :
+                        https://deloitte-5a2-dev-ed.my.salesforce.com/services/authcallback/Innova_ToolingAPIAuth</li>
+                      <li> Single Logout URL :
+                        https://deloitte-5a2-dev-ed.my.salesforce.com/services/auth/rp/oidc/logout </li>
+                    </ul>
+                  </ul>
+                </li>
+                <li>
+                  <p><span>3)</span> <strong> Create a named credential. </strong></p>
+                  <ul class="slds-is-nested">
+                    <li>Label : enter a name</li>
+                    <li>Name : this is populated automatically</li>
+                    <li>URL : https://your org instance.my.salesforce.com/services/data/v38.0/tooling/query</li>
+                    <li>Identity Type : Named Principal</li>
+                    <li>Authentication Protocol : OAuth 2.0</li>
+                    <li>Authentication Provider : enter the auth. provider name just created</li>
+                    <li>Scope : full refresh_token</li>
+                    <li>Generate Authorization Header : checked</li>
+                  </ul>
+                </li>
+                <li> 4)<strong> Populate the end point URL along with username credentials.</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!--  Adding Data Sample child component, commented for packaging  -->
+        <!-- <div class="slds-grid slds-gutters slds-align_absolute-center" if:true={selectedObject}>
+        <div class="slds-box slds-size_5-of-12" style="margin-left:1rem">
+          <div>
+            <c-innova_-data-sample-component all-fields-from-object={allFieldsFromObject}
+              related-sobj-name={selectedRelatedObjName} object-name={objectName} number-field-value={numberFieldValue}
+              is-create-related={isCreateRelated} is-field-disabled={isFieldDisabled}></c-innova_-data-sample-component>
+          </div>
+        </div>
+        </div> -->
+
+  
+      </lightning-tab>
+
+    </lightning-tabset>
+  </lightning-card>
+
+
+  <!-- ---------------------- New Tab Changes END------------------------ -->
+
+  <!-- 
+
+    <lightning-card icon-name="action:contract_line_outcome_data">
+<div class="slds-card" style="font-family: 'Open Sans',sand-serif;">
+<div>
+    // Adding UI for related objects START 
+    <lightning-card title="Related Records">
+      <div class="slds-form-element " style="margin-left:2rem; padding:5px">
+        <div class="slds-form-element__control">
+        <div class="slds-checkbox">
+        <input type="checkbox" name="options" id="checkbox-unique-id-80" value="checkbox-unique-id-80" checked={isCreateRelated}  onclick={createRelated} />
+        <label class="slds-checkbox__label" for="checkbox-unique-id-80">
+        <span class="slds-checkbox_faux"></span>
+        <span class="slds-form-element__label">Do you want to create combination of related records?</span>
+        </label>
+        </div>
+        </div>
+        </div>
+      </lightning-card>
+    -->
+
+
+
+  <!-- ----------------------ADDING Related Object List  DATA  END------------------------>
+
+
+  <!-- Adding UI for related objects END -->
+
+  <!-- 
+  <lightning-card>
+    <div>
+      <div class="slds-grid slds-gutters">
+        <div class="slds-form-element slds-col">
+          <div style="margin-left:2rem;">
+          <label class="slds-checkbox_toggle slds-grid" >
+          
+          <input type="checkbox" name="checkbox-toggle-16" value="checkbox-toggle-16" aria-describedby="checkbox-toggle-16" checked={isFastCreate} onclick={fastCreateEnable}/>
+          <span id="checkbox-toggle-16" class="slds-checkbox_faux_container" aria-live="assertive">
+          <span class="slds-checkbox_faux"></span>
+          <span class="slds-checkbox_on">Enabled</span>
+          <span class="slds-checkbox_off">Disabled</span>
+          </span>
+          </label>
+          <span class="slds-form-element__label slds-m-bottom_none" >Fast Create Record </span>
+          </div>
+       
+        </div>
+
+      <div class="slds-form-element slds-col " >
+        <div dir="rtl" style="margin-right:2rem;">
+        <label class="slds-checkbox_toggle slds-grid" >
+        
+        <input type="checkbox" name="checkbox-toggle-15" value="checkbox-toggle-15" aria-describedby="checkbox-toggle-15" checked={isCreateMultiple} onclick={createMultiple}/>
+        <span id="checkbox-toggle-15" class="slds-checkbox_faux_container" aria-live="assertive">
+        <span class="slds-checkbox_faux"></span>
+        <span class="slds-checkbox_on">Enabled</span>
+        <span class="slds-checkbox_off">Disabled</span>
+        </span>
+        </label>
+        <span class="slds-form-element__label slds-m-bottom_none" >Create Multiple Record </span>
+        
+      </div>
+        </div>
+        </div>     
+ </div>
+</lightning-card>
+
+</div>-->
+
+
+  <!-- Footer -->
+
+  <footer class="slds-modal__footer " style="padding: 2.50rem 1rem;" if:true={objectName}>
+    <div class="slds-clearfix slds-align_absolute-center">
+
+      <div class="slds-float_left">
+        <div class="slds-clearfix ">
+          &nbsp;&nbsp;
+          <div class="slds-float_left">
+            <!-- class ="slds-align_absolute-center" -->
+            <lightning-button icon-name="utility:download" variant="brand" label="Create Record(s)"
+              disabled={isCreateDisabled} title="Submit Your Request to Generate Records" onclick={insertRecords}>
+            </lightning-button>
+          </div>
+          &nbsp;&nbsp;
+
+          <div class="slds-float_right">
+            <lightning-button icon-name="utility:preview" variant="brand" label="View Uploaded Record"
+              title="View Uploaded Record" onclick={viewCreatedRecords}></lightning-button>
+          </div>
+
+
+          &nbsp;&nbsp;
+
+
+        </div>
+      </div>
+    </div>
+
+    <div class="slds-float_left" style="padding: 1.0rem 1rem;">
+      <p>Caution : Before submitting please download the validation rule set to check the correct information .
+        &nbsp;&nbsp;&nbsp; <a onclick={exportValidationError} title="Click to download Validation rules ">Click Here</a>
+        or <a onclick={openModal} title="Click to disable all active validation rules">
+          Disable Validations </a></p>
+    </div>
+
+  </footer>
+
+  <div if:true={isModalOpen}>
+    <template if:true={isModalOpen}>
+      <!-- Modal/Popup Box LWC starts here -->
+      <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+          <div class="slds-modal__container">
+              <!-- Modal/Popup Box LWC header here -->
+              <header class="slds-modal__header">
+                  <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                      <lightning-icon icon-name="utility:close"
+                          alternative-text="close"
+                          variant="inverse"
+                          size="small" ></lightning-icon>
+                      <span class="slds-assistive-text">Close</span>
+                  </button>
+                  <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Deactivate all Validation Rules</h2>
+              </header>
+              <!-- Modal/Popup Box LWC body starts here -->
+              <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                  <p><b>Clicking OK will disable all Validations of the selected object. Do you wish to continue?
+                  </b></p>
+              </div>
+              <!-- Modal/Popup Box LWC footer starts here -->
+              <footer class="slds-modal__footer">
+                  <button class="slds-button slds-button_neutral" onclick={closeModal} title="Cancel">Cancel</button>
+                  <button class="slds-button slds-button_brand" onclick={clickOK} title="OK">OK</button>
+              </footer>
+          </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
+    
+  </div>
+
+
+  <!-- View Uploaded START  -->
+  <!--Use template if:true to display/hide popup based on isModalOpen value-->
+  <div if:true={objectName}>
+    <template if:true={isViewUploaded}>
+      <!-- Modal/Popup Box LWC starts here -->
+
+      <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+        aria-describedby="modal-content-id-1"
+        class="slds-modal slds-fade-in-open slds-modal_large --slds-c-modal-shadow">
+        <div class="slds-modal__container">
+          <!-- Modal/Popup Box LWC header here -->
+          <header class="slds-modal__header">
+            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
+              onclick={closeViewUploaded}>
+              <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small">
+              </lightning-icon>
+              <span class="slds-assistive-text">Close</span>
+            </button>
+            <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">Recently Created records</h2>
+          </header>
+          <!-- Modal/Popup Box LWC body starts here -->
+          <div class="slds-modal__content box">
+            <lightning-tabset>
+              <lightning-tab label="View data">
+                <div class="slds-modal__content slds-p-around_large" id="modal-content-id-2">
+                  <lightning-card variant="Narrow" title={objectName} icon-name="standard:related_list">
+                    <p class="slds-p-horizontal_small">
+                      <lightning-datatable if:true={displayRecords} key-field="id" data={recordsToDisplay}
+                        columns={recordCols} onrowaction={navigateRecordPage}>
+                      </lightning-datatable>
+                    </p>
+                  </lightning-card>
+                  <!-- VIEW UPLOADED PAGINATION START -->
+                  <!--slds-grid slds-grid_vertical-align-center slds-grid_align-spread-->
+                  <div class="slds-modal__content slds-p-around_medium " style="padding-top: 0.5em;  overflow: hidden;">
+                    <!--RECORDS PER PAGE-->
+                    <div class="slds-col">
+                      <div class="slds-align_absolute-center">
+                        <!-- <div class="slds-list_inline slds-p-bottom_xx-small"> -->
+                        <label class="slds-text-color_weak slds-p-horizontal_x-small" for="recordsPerPage">Page Size:</label>
+                        <div class="slds-select_container">
+                          <div>
+                            5
+                          </div>
+                          <!-- <select class="slds-select" id="recordsPerPage" onchange={handleRecordsPerPage}>
+                            <template for:each={pageSizeOptions} for:item="option">
+                              <option key={option} value={option}>{option}</option>
+                            </template>
+                          </select> -->
+                        </div>
+                        <!-- </div> -->
+                        <!--PAGE NAVIGATION-->
+
+                        <lightning-button disabled={bDisableFirst} icon-name="utility:jump_to_left" label="First"
+                          class="slds-p-horizontal_x-small" alternative-text="first page" onclick={firstPage}>
+                        </lightning-button>
+
+                        <lightning-button disabled={bDisableFirst} icon-name="utility:chevronleft" label="Previous"
+                          alternative-text="Previous" onclick={previousPage}></lightning-button>
+                        &nbsp;
+                        <span class="slds-badge">Showing {pageNumber} &nbsp;of&nbsp; {totalPages}
+                          &nbsp;&nbsp;Page(s)</span>
+                        &nbsp;
+                        <lightning-button disabled={bDisableLast} icon-name="utility:chevronright" label="Next"
+                          alternative-text="Next" onclick={nextPage} class="slds-p-horizontal_x-small"
+                          icon-position="right"></lightning-button>
+                        <lightning-button disabled={bDisableLast} icon-name="utility:jump_to_right" label="Last"
+                          alternative-text="last page" onclick={lastPage} icon-position="right"></lightning-button>
+                        <!--TOTAL RECORDS-->
+                        <div class="slds-clearfix">
+                          <div class="slds-float_right">
+                            <span class="slds-badge"> Total Records: {totalRecords}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                  <!-- VIEW UPLOADED PAGINATION END-->
+                </div>
+              </lightning-tab>
+
+
+              <lightning-tab label="View activity">
+                <!-- test data to show activity records-->
+                <div style="height: 21rem;">
+                  <lightning-datatable 
+                  key-field="id" 
+                  data={activityData} 
+                  columns={employeeColumns} onclick={viewActivity} onrowaction={navigateRecordPage}>
+                  </lightning-datatable>
+                  <!-- END test data to show activity records show-row-number-column hide-checkbox-column onrowaction={navigateRecordPage}-->
+                </div>
+              </lightning-tab>
+            </lightning-tabset>
+          </div>
+          <!-- Modal/Popup Box LWC footer starts here -->
+          <footer class="slds-modal__footer">
+            <button class="slds-button slds-button_neutral" onclick={closeViewUploaded} title="Cancel">Cancel</button>
+            <!-- <button class="slds-button slds-button_brand" onclick={submitDetails} title="OK">OK</button> -->
+          </footer>
+        </div>
+      </section>
+
+
+      <template if:false={hideOverlay}>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+      </template>
+      <!-- <div class="slds-backdrop slds-backdrop_open"></div> -->
+    </template>
+  </div>
+
+  <!-- View Uploaded END  -->
+
+  <!--------------------- modal box for Sequential Record/Related Record START ---------------------->
+
+  <template if:true={relatedRecPopup}>
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+      aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+      <div class="slds-modal__container">
+        <!-- modal header start -->
+        <header class="slds-modal__header">
+          <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close"
+            onclick={customHiderelatedRecPopup}>
+            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small">
+            </lightning-icon>
+            <span class="slds-assistive-text">Close</span>
+          </button>
+          <h2 class="slds-text-heading_medium slds-hyphenate">Related Records</h2>
+        </header>
+        <!-- modal body start -->
+        <div class="slds-modal__content slds-p-around_medium">
+          <div class="slds-col slds-size_6-of-12 slds-p-horizontal--medium slds-m-bottom_medium slds-modal__content">
+            <lightning-combobox name="relatedrecords" label="Type of Related Records" value={value}
+              placeholder="Type of Related Records" options={relatedOptions} onchange={handleRelChange}>
+            </lightning-combobox>
+          </div>
+
+          <div if:true={multiplerecords}
+            class="slds-col slds-size_6-of-12 slds-p-horizontal--medium slds-m-bottom_medium">
+            <lightning-input type="number" label="No. of Multiple Child Records?" onchange={handleNumberChange}>
+            </lightning-input>
+          </div>
+        </div>
+        <!-- modal footer start-->
+        <footer class="slds-modal__footer">
+          <button class="slds-button slds-button_neutral" onclick={customHiderelatedRecPopup}>Cancel</button>
+          <button class="slds-button slds-button_brand" onclick={relatedRecord}>Save</button>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open">
+    </div>
+  </template>
+  <!-- modal box for Sequential Record/Related Record END -->
+
+
+  <!-- For Testing -->
+  <!--<input if:true={ready} type="button" value="Parse" onclick={parseFile} />-->
+  <lightning-spinner if:false={ready}>
+  </lightning-spinner>
+
+</template>

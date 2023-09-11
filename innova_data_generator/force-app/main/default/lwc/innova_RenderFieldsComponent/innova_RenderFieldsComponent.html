@@ -1,0 +1,46 @@
+<template>
+<lightning-card>
+        <!--  ---------------------------------------------------Optional field Start-- ----------------------------------------- -->
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col">
+                               <!-- changing picklist to input type  -->
+                               <select class="slds-select ddlViewBy" name="Field" data-id={rec.index} onchange={selectedFieldOptional}>
+                                <option value="null">---None---</option>                
+                                    <template for:each={allFieldsFromObject} for:item="fieldData">
+                                    <option key={fieldData} data-item={fieldData.custFldlabel} value={fieldData.custFldvalue} 
+                                    if:true={fieldData.fldIsNillable}>
+                                        {fieldData.custFldlabel}  | <p style="font-style:italic">{fieldData.dataType}</p>
+                                    </option>
+                                    </template>
+                            </select>  
+            </div>
+            <div class="slds-col">
+                <div if:false={isOptionalFieldDataPicklist}>
+                    <lightning-input type={inputType} variant="label-hidden" 
+                    label="" data-id={rec.index} name="Value" value={rec.Value}  disabled={isFieldDisabled}
+                    onchange={selectedFieldOptional}></lightning-input>
+                </div>
+                <div if:true={isOptionalFieldDataPicklist}>
+                   <select  class="slds-select" name="Value" data-id={rec.index} onchange={selectedFieldOptionalPicklist}>
+                        <template for:each={selectedColumn.pickJSONArrRes} for:item="selItem">
+                        <option key={selItem} value={selItem.pickKeys}>{selItem.pickKeys}</option>
+                    </template>
+                    </select>
+                </div>
+            </div>
+          </div>
+   
+<!--                 
+                <td>
+                    <div if:true={isOptionalFieldText}>
+                    <div>
+                    <lightning-input type="text" variant="label-hidden" label="" data-id={rec.index} name="Value" value={rec.Value} onchange={selectedFieldOptional}></lightning-input>
+                </div>
+                </div>
+                
+                </td> -->
+ 
+    </lightning-card>
+
+
+</template>

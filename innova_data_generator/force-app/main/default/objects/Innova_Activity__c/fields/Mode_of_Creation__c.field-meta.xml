@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Mode_of_Creation__c</fullName>
+    <description>Each tab on UI displays a mode of creation, this is used to capture mode the user selects to insert their data</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Please enter mode</inlineHelpText>
+    <label>Mode of Creation</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Fast Record Creation</fullName>
+                <default>false</default>
+                <label>Fast Record Creation</label>
+            </value>
+            <value>
+                <fullName>Multiple Record Creation (CSV)</fullName>
+                <default>false</default>
+                <label>Multiple Record Creation (CSV)</label>
+            </value>
+            <value>
+                <fullName>Sequential Record Creation</fullName>
+                <default>false</default>
+                <label>Sequential Record Creation</label>
+            </value>
+            <value>
+                <fullName>Single Record Creation</fullName>
+                <default>false</default>
+                <label>Single Record Creation</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
